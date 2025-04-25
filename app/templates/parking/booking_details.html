@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Details - Smart Parking System{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<!-- Bootstrap Datepicker CSS -->
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+<style>
+    .form-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .location-details {
+        background-color: #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .location-image {
+        max-height: 200px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .booking-summary {
+        background-color: #e9f7ef;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .cost-preview {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('parking.find_parking') }}">Find Parking</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Booking Details</li>
+                </ol>
+            </nav>
+
+            <h2 class="mb-4">
+                <i class="fas fa-calendar-alt me-2"></i> Booking Details
+            </h2>
+
+            <div class="row">
+                <!-- Location details sidebar -->
+                <div class="col-md-4 mb-4">
+                    <div class="location-details">
+                        <img src="{{ location.image_url }}" class="location-image" alt="{{ location.name }}">
+                        <h4>{{ location.name }}</h4>
+                        <p><i class="fas fa-map-marker-alt me-2"></i>{{ location.address }}</p>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="far fa-clock me-2"></i>Timings:</span>
+                            <span>{{ location.opening_time }} - {{ location.closing_time }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span><i class="fas fa-car me-2"></i>Available:</span>
+                            <span>{{ location.available_slots }} / {{ location.total_slots }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span><i class="fas fa-rupee-sign me-2"></i>Rate:</span>
+                            <span>₹{{ location.hourly_rate }}/hour</span>
+                        </div>
+                    </div>
+                    <div class="booking-summary" id="bookingSummary">
+                        <h5><i class="fas fa-receipt me-2"></i>Booking Summary</h5>
+                        <div class="d-flex justify-content-between mt-3">
+                            <span>Date:</span>
+                            <span id="summaryDate">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Time:</span>
+                            <span id="summaryTime">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Duration:</span>
+                            <span id="summaryDuration">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Vehicle:</span>
+                            <span id="summaryVehicle">-</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Total Cost:</span>
+                            <span class="cost-preview" id="summaryCost">₹0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking form -->
+                <div class="col-md-8">
+                    <div class="form-section">
+                        <form id="bookingForm" method="POST"
+                            action="{{ url_for('parking.booking_details', parking_id=location.id) }}{% if booking %}?booking_id={{ booking.id }}{% endif %}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="date" class="form-label">Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                        <input type="text" class="form-control" id="date" name="date"
+                                            placeholder="YYYY-MM-DD" autocomplete="off"
+                                            value="{% if booking %}{{ booking.booking_date.strftime('%Y-%m-%d') }}{% endif %}"
+                                            required>
+                                    </div>
+                                    <div class="error-message" id="dateError">Please select a valid date</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="vehicle_number" class="form-label">Vehicle Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-car"></i></span>
+                                        <input type="text" class="form-control" id="vehicle_number"
+                                            name="vehicle_number" placeholder="e.g., MH02AB1234"
+                                            pattern="[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{4}"
+                                            title="Enter a valid Indian vehicle number (e.g., GJ01AB1234)"
+                                            value="{% if booking %}{{ booking.vehicle_number }}{% endif %}" required>
+                                    </div>
+                                    <div class="error-message" id="vehicleError">Please enter a valid vehicle number
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="start_time" class="form-label">Start Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                        <input type="time" class="form-control" id="start_time" name="start_time"
+                                            value="{% if booking %}{{ booking.start_time.strftime('%H:%M') }}{% endif %}"
+                                            required>
+                                    </div>
+                                    <div class="error-message" id="startTimeError">Please select a valid start time
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="end_time" class="form-label">End Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                        <input type="time" class="form-control" id="end_time" name="end_time"
+                                            value="{% if booking %}{{ booking.end_time.strftime('%H:%M') }}{% endif %}"
+                                            required>
+                                    </div>
+                                    <div class="error-message" id="endTimeError">End time must be after start time</div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i> The parking rate is ₹{{ location.hourly_rate }}
+                                per hour.
+                            </div>
+
+                            <div class="alert-secondary" role="alert">
+                                <i class="fas fa-car me-2"></i> <strong>Vehicle Number Format:</strong> Please enter
+                                your vehicle registration number in the standard Indian format (e.g., MH02AB1234).
+                                <ul class="mb-0 mt-1">
+                                    <li>First 2 letters: State code (e.g., MH, GJ, DL)</li>
+                                    <li>Next 1-2 digits: District code (e.g., 01, 02, 12)</li>
+                                    <li>Next 1-2 letters: Series code (e.g., AB, Z, XY)</li>
+                                    <li>Last 4 digits: Vehicle number (e.g., 1234, 5678)</li>
+                                </ul>
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-between">
+                                <a href="{{ url_for('parking.find_parking') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i> Back
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Continue <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Bootstrap Datepicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Initialize datepicker
+        $('#date').datepicker({
+            format: 'yyyy-mm-dd',
+            startDate: new Date(),
+            autoclose: true,
+            todayHighlight: true
+        }).on('changeDate', function (e) {
+            // Ensure date is formatted correctly
+            const selectedDate = $(this).datepicker('getFormattedDate');
+            $(this).val(selectedDate);
+            updateBookingSummary();
+        });
+
+        // If no date is set, default to today
+        if (!$('#date').val()) {
+            $('#date').datepicker('setDate', new Date());
+        }
+
+        // Set default times if not already set
+        if (!$('#start_time').val() || !$('#end_time').val()) {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+
+            // Round to nearest 30 minutes
+            const roundedMinutes = Math.ceil(minutes / 30) * 30;
+            const startHour = hours + Math.floor(roundedMinutes / 60);
+            const startMin = roundedMinutes % 60;
+
+            // Format time as HH:MM
+            const startTime = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+            const endTime = `${String(startHour + 1).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+
+            if (!$('#start_time').val()) {
+                $('#start_time').val(startTime);
+            }
+
+            if (!$('#end_time').val()) {
+                $('#end_time').val(endTime);
+            }
+        }
+
+        // Update booking summary when inputs change
+        function updateBookingSummary() {
+            const date = $('#date').val();
+            const startTime = $('#start_time').val();
+            const endTime = $('#end_time').val();
+            const vehicleNumber = $('#vehicle_number').val();
+
+            if (date) {
+                $('#summaryDate').text(date);
+            }
+
+            if (startTime && endTime) {
+                $('#summaryTime').text(`${startTime} to ${endTime}`);
+
+                // Calculate duration
+                const start = new Date(`2000-01-01T${startTime}`);
+                const end = new Date(`2000-01-01T${endTime}`);
+
+                if (end > start) {
+                    const durationMs = end - start;
+                    const durationHours = durationMs / (1000 * 60 * 60);
+                    $('#summaryDuration').text(`${durationHours.toFixed(1)} hours`);
+
+                    // Calculate cost
+                    const hourlyRate = parseInt('{{ location.hourly_rate }}', 10);
+                    const cost = durationHours * hourlyRate;
+                    $('#summaryCost').text(`₹${cost.toFixed(2)}`);
+                } else {
+                    $('#summaryDuration').text('-');
+                    $('#summaryCost').text('₹0.00');
+                }
+            }
+
+            if (vehicleNumber) {
+                $('#summaryVehicle').text(vehicleNumber);
+            }
+        }
+
+        // Input validation
+        function validateForm() {
+            let isValid = true;
+
+            // Validate date
+            const selectedDate = new Date($('#date').val());
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                $('#dateError').text('Date cannot be in the past').show();
+                isValid = false;
+            } else {
+                $('#dateError').hide();
+            }
+
+            // Validate vehicle number
+            const vehicleNumber = $('#vehicle_number').val().trim();
+            const indianVehicleFormat = /^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{4}$/;
+
+            if (!vehicleNumber) {
+                $('#vehicleError').text('Vehicle number is required').show();
+                isValid = false;
+            } else if (!indianVehicleFormat.test(vehicleNumber)) {
+                $('#vehicleError').text('Please enter a valid Indian vehicle number (e.g., GJ01AB1234)').show();
+                isValid = false;
+            } else {
+                $('#vehicleError').hide();
+            }
+
+            // Validate times
+            const startTime = $('#start_time').val();
+            const endTime = $('#end_time').val();
+
+            if (!startTime) {
+                $('#startTimeError').text('Start time is required').show();
+                isValid = false;
+            } else {
+                $('#startTimeError').hide();
+            }
+
+            if (!endTime) {
+                $('#endTimeError').text('End time is required').show();
+                isValid = false;
+            } else {
+                $('#endTimeError').hide();
+            }
+
+            // Check if end time is after start time
+            if (startTime && endTime) {
+                const start = new Date(`2000-01-01T${startTime}`);
+                const end = new Date(`2000-01-01T${endTime}`);
+
+                if (end <= start) {
+                    $('#endTimeError').text('End time must be after start time').show();
+                    isValid = false;
+                } else {
+                    $('#endTimeError').hide();
+                }
+            }
+
+            return isValid;
+        }
+
+        // Set up event listeners
+        $('#date, #start_time, #end_time, #vehicle_number').on('change', updateBookingSummary);
+
+        // Form submission with enhanced validation
+        $('#bookingForm').on('submit', function (e) {
+            // Format vehicle number to uppercase to match pattern
+            const vehicleInput = $('#vehicle_number');
+            vehicleInput.val(vehicleInput.val().toUpperCase().trim());
+
+            // Ensure date is in yyyy-mm-dd format
+            const dateInput = $('#date');
+            const dateVal = dateInput.val();
+
+            // Check date format
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+                $('#dateError').text('Invalid date format. Use YYYY-MM-DD').show();
+                e.preventDefault();
+                return false;
+            }
+
+            // Verify all validation rules
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
+            }
+
+            return true;
+        });
+
+        // Initialize summary
+        updateBookingSummary();
+
+        // Helper function for vehicle number formatting
+        $('#vehicle_number').on('input', function () {
+            let value = $(this).val().toUpperCase();
+
+            // Remove any spaces or special characters
+            value = value.replace(/[^A-Z0-9]/g, '');
+
+            // Auto-format the vehicle number as user types
+            let formattedValue = '';
+            if (value.length > 0) {
+                // First two characters (state code)
+                formattedValue = value.substring(0, Math.min(2, value.length));
+
+                // Next 1-2 digits (district code)
+                if (value.length > 2) {
+                    formattedValue += value.substring(2, Math.min(4, value.length));
+
+                    // Next 1-2 characters (series code)
+                    if (value.length > 4) {
+                        formattedValue += value.substring(4, Math.min(6, value.length));
+
+                        // Last 4 digits (number)
+                        if (value.length > 6) {
+                            formattedValue += value.substring(6, Math.min(10, value.length));
+                        }
+                    }
+                }
+            }
+
+            $(this).val(formattedValue);
+        });
+    });
+</script>
+{% endblock %}

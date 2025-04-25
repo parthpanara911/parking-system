@@ -1,0 +1,137 @@
+<aside class="sidebar sidebar-default sidebar-white sidebar-base navs-rounded-all ">
+    <div class="sidebar-header d-flex align-items-center justify-content-start">
+        <a href="{{ url_for('admin.dashboard') }}" class="navbar-brand">
+
+            <!-- Logo start-->
+            <div style="display: flex; align-items: center; gap: 1px;">
+                <i class="fas fa-parking fa-lg text-primary"></i>
+                <h5 class="logo-title mb-0">Smart Parking</h5>
+            </div>
+            <!-- logo End -->
+
+        </a>
+        <div class="sidebar-toggle" data-toggle="sidebar" data-active="true">
+            <i class="icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.25 12.2744L19.25 12.2744" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M10.2998 18.2988L4.2498 12.2748L10.2998 6.24976" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </i>
+        </div>
+    </div>
+    <div class="sidebar-body pt-0 data-scrollbar">
+        <div class="sidebar-list">
+            <!-- Sidebar Menu Start -->
+            <ul class="navbar-nav iq-main-menu" id="sidebar-menu">
+                <li class="nav-item static-item">
+                    <a class="nav-link static-item disabled" href="#" tabindex="-1">
+                        <span class="default-icon">Home</span>
+                        <span class="mini-icon">-</span>
+                    </a>
+                </li>
+                <!-- Dashboard -->
+                <li class="nav-item dashboard-section">
+                    <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                        <i class="fas fa-tachometer-alt fa-lg text-primary me-2"></i>
+                        <span class="item-name">Dashboard</span>
+                    </a>
+                </li>
+
+
+                <!-- Parking Management -->
+                <li>
+                    <hr class="hr-horizontal">
+                </li>
+                <li class="nav-item static-item">
+                    <a class="nav-link static-item disabled" href="#" tabindex="-1">
+                        <span class="default-icon">Parking Management</span>
+                        <span class="mini-icon">-</span>
+                    </a>
+                </li>
+
+                <!-- Parking Slots -->
+                <li class="nav-item parking-slots-section">
+                    <a class="nav-link" href="{{ url_for('admin.parking_slots') }}">
+                        <i class="fas fa-warehouse fa-lg text-success me-2"></i>
+                        <span class="item-name">Parking Slots</span>
+                    </a>
+                </li>
+
+
+                <!-- Bookings (Collapsible) -->
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#parking-booking" role="button"
+                        aria-expanded="false" aria-controls="parking-booking">
+                        <i class="fas fa-calendar-alt fa-lg text-primary me-2"></i>
+                        <span class="item-name">Bookings</span>
+                        <i class="right-icon">
+                            <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" width="18" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </i>
+                    </a>
+
+                    <ul class="sub-nav collapse" id="parking-booking" data-bs-parent="#sidebar-menu">
+                        <!-- New Booking -->
+                        <li class="nav-item booking-section">
+                            <a class="nav-link" href="{{ url_for('admin.bookings') }}">
+                                <i class="fas fa-calendar-check fa-lg text-warning me-2"></i>
+                                <span class="item-name">All Bookings</span>
+                            </a>
+                        </li>
+
+                        <!-- Booking History -->
+                        <li class="nav-item booking-history-section">
+                            <a class="nav-link" href="{{ url_for('admin.booking_history') }}">
+                                <i class="fas fa-history fa-lg text-secondary me-2"></i>
+                                <span class="item-name">Booking History</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <!-- Users -->
+                <li class="nav-item user-section">
+                    <a class="nav-link" href="{{ url_for('admin.users') }}">
+                        <i class="fas fa-users fa-lg text-dark me-2"></i>
+                        <span class="item-name">Users</span>
+                    </a>
+                </li>
+
+
+                <!-- Vehicles -->
+                <li class="nav-item vehicles-section">
+                    <a class="nav-link" href="{{ url_for('admin.vehicles') }}">
+                        <i class="fas fa-car fa-lg text-danger me-2"></i>
+                        <span class="item-name">Vehicles</span>
+                    </a>
+                </li>
+                <!-- Payment -->
+                <li class="nav-item payment-section">
+                    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#payment-submenu" role="button"
+                        aria-expanded="false" aria-controls="payment-submenu">
+                        <i class="fas fa-credit-card fa-lg text-primary me-2"></i>
+                        <span class="item-name">Payments</span>
+                        <i class="fas fa-chevron-down ms-auto text-muted"></i>
+                    </a>
+
+                    <div class="collapse" id="payment-submenu">
+                        <ul class="nav flex-column ms-4 mt-2">
+                            <!-- Transactions -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('admin.payments') }}">
+                                    <i class="fas fa-money-check-alt me-2 text-success"></i>
+                                    Transactions
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                <div class="sidebar-footer"></div>
+</aside>

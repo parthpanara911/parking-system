@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Smart Parking System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Register</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm" novalidate>
+                        {{ form.hidden_tag() }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.username.label(class="form-label") }}
+                                    {{ form.username(class="form-control", placeholder="Choose a username",
+                                    required=true) }}
+                                    <div class="invalid-feedback" id="username-feedback">
+                                        Username is required and must be between 3-64 characters.
+                                    </div>
+                                    {% if form.username.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.username.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.email.label(class="form-label") }}
+                                    {{ form.email(class="form-control", placeholder="Enter your email", required=true)
+                                    }}
+                                    <div class="invalid-feedback" id="email-feedback">
+                                        Please enter a valid email address.
+                                    </div>
+                                    {% if form.email.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.email.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.first_name.label(class="form-label") }}
+                                    {{ form.first_name(class="form-control", placeholder="Your first name",
+                                    required=true) }}
+                                    <div class="invalid-feedback" id="first-name-feedback">
+                                        First name is required and must contain only letters.
+                                    </div>
+                                    {% if form.first_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.first_name.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.last_name.label(class="form-label") }}
+                                    {{ form.last_name(class="form-control", placeholder="Your last name", required=true)
+                                    }}
+                                    <div class="invalid-feedback" id="last-name-feedback">
+                                        Last name is required and must contain only letters.
+                                    </div>
+                                    {% if form.last_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.last_name.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            {{ form.phone_number.label(class="form-label") }}
+                            {{ form.phone_number(class="form-control", placeholder="Your phone number (10 digits)",
+                            required=true) }}
+                            <div class="invalid-feedback" id="phone-feedback">
+                                Phone number must be 10 digits.
+                            </div>
+                            {% if form.phone_number.errors %}
+                            <div class="text-danger">
+                                {% for error in form.phone_number.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.password.label(class="form-label") }}
+                                    {{ form.password(class="form-control", placeholder="Choose a password",
+                                    required=true) }}
+                                    <div class="invalid-feedback" id="password-feedback">
+                                        Password must be at least 8 characters with one letter and one number.
+                                    </div>
+                                    {% if form.password.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.password.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.confirm_password.label(class="form-label") }}
+                                    {{ form.confirm_password(class="form-control", placeholder="Confirm your password",
+                                    required=true) }}
+                                    <div class="invalid-feedback" id="confirm-password-feedback">
+                                        Passwords must match.
+                                    </div>
+                                    {% if form.confirm_password.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.confirm_password.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-text mb-3">
+                            <small>* Password must be at least 8 characters and contain at least one letter and one
+                                number.</small>
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-block") }}
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('registerForm');
+        const username = document.getElementById('username');
+        const email = document.getElementById('email');
+        const firstName = document.getElementById('first_name');
+        const lastName = document.getElementById('last_name');
+        const phoneNumber = document.getElementById('phone_number');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirm_password');
+
+        // Validate username
+        username.addEventListener('input', function () {
+            const usernameRegex = /^[A-Za-z0-9_.]{3,64}$/;
+            if (!username.value) {
+                username.classList.add('is-invalid');
+                document.getElementById('username-feedback').textContent = 'Username is required.';
+                return false;
+            } else if (!usernameRegex.test(username.value)) {
+                username.classList.add('is-invalid');
+                document.getElementById('username-feedback').textContent = 'Username must be 3-64 characters and contain only letters, numbers, dots and underscores.';
+                return false;
+            } else {
+                username.classList.remove('is-invalid');
+                username.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Validate email
+        email.addEventListener('input', function () {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value) {
+                email.classList.add('is-invalid');
+                document.getElementById('email-feedback').textContent = 'Email is required.';
+                return false;
+            } else if (!emailRegex.test(email.value)) {
+                email.classList.add('is-invalid');
+                document.getElementById('email-feedback').textContent = 'Please enter a valid email address.';
+                return false;
+            } else {
+                email.classList.remove('is-invalid');
+                email.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Validate first name
+        firstName.addEventListener('input', function () {
+            const nameRegex = /^[A-Za-z\s]+$/;
+            if (!firstName.value) {
+                firstName.classList.add('is-invalid');
+                document.getElementById('first-name-feedback').textContent = 'First name is required.';
+                return false;
+            } else if (!nameRegex.test(firstName.value)) {
+                firstName.classList.add('is-invalid');
+                document.getElementById('first-name-feedback').textContent = 'First name must contain only letters and spaces.';
+                return false;
+            } else {
+                firstName.classList.remove('is-invalid');
+                firstName.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Validate last name
+        lastName.addEventListener('input', function () {
+            const nameRegex = /^[A-Za-z\s]+$/;
+            if (!lastName.value) {
+                lastName.classList.add('is-invalid');
+                document.getElementById('last-name-feedback').textContent = 'Last name is required.';
+                return false;
+            } else if (!nameRegex.test(lastName.value)) {
+                lastName.classList.add('is-invalid');
+                document.getElementById('last-name-feedback').textContent = 'Last name must contain only letters and spaces.';
+                return false;
+            } else {
+                lastName.classList.remove('is-invalid');
+                lastName.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Validate phone number
+        phoneNumber.addEventListener('input', function () {
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneNumber.value) {
+                phoneNumber.classList.add('is-invalid');
+                document.getElementById('phone-feedback').textContent = 'Phone number is required.';
+                return false;
+            } else if (!phoneRegex.test(phoneNumber.value)) {
+                phoneNumber.classList.add('is-invalid');
+                document.getElementById('phone-feedback').textContent = 'Phone number must be exactly 10 digits.';
+                return false;
+            } else {
+                phoneNumber.classList.remove('is-invalid');
+                phoneNumber.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Validate password
+        password.addEventListener('input', function () {
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
+            if (!password.value) {
+                password.classList.add('is-invalid');
+                document.getElementById('password-feedback').textContent = 'Password is required.';
+                return false;
+            } else if (!passwordRegex.test(password.value)) {
+                password.classList.add('is-invalid');
+                document.getElementById('password-feedback').textContent = 'Password must be at least 8 characters and contain at least one letter and one number.';
+                return false;
+            } else {
+                password.classList.remove('is-invalid');
+                password.classList.add('is-valid');
+                validateConfirmPassword();
+                return true;
+            }
+        });
+
+        // Validate confirm password
+        function validateConfirmPassword() {
+            if (!confirmPassword.value) {
+                confirmPassword.classList.add('is-invalid');
+                document.getElementById('confirm-password-feedback').textContent = 'Please confirm your password.';
+                return false;
+            } else if (confirmPassword.value !== password.value) {
+                confirmPassword.classList.add('is-invalid');
+                document.getElementById('confirm-password-feedback').textContent = 'Passwords must match.';
+                return false;
+            } else {
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+                return true;
+            }
+        }
+
+        confirmPassword.addEventListener('input', validateConfirmPassword);
+
+        // Form submission validation
+        form.addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Trigger validation for all fields
+            if (!username.value || !/^[A-Za-z0-9_.]{3,64}$/.test(username.value)) {
+                username.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                email.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!firstName.value || !/^[A-Za-z\s]+$/.test(firstName.value)) {
+                firstName.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!lastName.value || !/^[A-Za-z\s]+$/.test(lastName.value)) {
+                lastName.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!phoneNumber.value || !/^[0-9]{10}$/.test(phoneNumber.value)) {
+                phoneNumber.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!password.value || !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/.test(password.value)) {
+                password.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!confirmPassword.value || confirmPassword.value !== password.value) {
+                confirmPassword.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

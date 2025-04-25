@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Smart Parking System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-12 text-center mb-5">
+            <h1 class="display-4">Welcome, {{ current_user.first_name or current_user.username }} to the Parking System</h1>
+            <p class="lead">Find and book parking spaces with ease</p>
+        </div>
+    </div>
+
+    <!-- <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-car fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Find Parking</h3>
+                    <p class="card-text">Search for available parking spots near your destination</p>
+                    <a href="#" class="btn btn-primary">Find Spots</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-ticket-alt fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">Book in Advance</h3>
+                    <p class="card-text">Reserve your parking spot ahead of time to ensure availability</p>
+                    <a href="#" class="btn btn-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-history fa-3x mb-3 text-primary"></i>
+                    <h3 class="card-title">View Bookings</h3>
+                    <p class="card-text">Check your current and past parking bookings</p>
+                    <a href="#" class="btn btn-primary">My Bookings</a>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h2 class="mb-4">How It Works</h2>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                    style="width: 50px; height: 50px;">1</div>
+                <h5>Find Parking location</h5>
+                <p>Search for available parking spots near your destination</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                    style="width: 50px; height: 50px;">2</div>
+                <h5>Fill the details and book slot</h5>
+                <p>Fill the booking details and book the slot</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                    style="width: 50px; height: 50px;">3</div>
+                <h5>Book & Pay</h5>
+                <p>Reserve your spot and pay</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center mb-3"
+                    style="width: 50px; height: 50px;">4</div>
+                <h5>Park & Go</h5>
+                <p>Use your spot without hassle</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

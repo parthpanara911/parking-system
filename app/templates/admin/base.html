@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-bs-theme="light" data-bs-theme-color="theme-color-default">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Smart Parking | Admin{% endblock %}</title>
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/core/libs.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendor/aos/dist/aos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/hope-ui.min1fc6.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.min1fc6.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/customizer.min1fc6.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/rtl.min1fc6.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block additional_css %}{% endblock %}
+</head>
+
+<body class="  ">
+    <!-- Sidebar -->
+    {% include 'admin/includes/sidebar.html' %}
+    <!-- Sidebar End -->
+
+    <main class="main-content">
+        <div class="position-relative iq-banner">
+            <!--Nav Start-->
+            {% include 'admin/includes/navbar.html' %}
+            <!-- Nav Header Component Start -->
+            <div class="iq-header-img">
+                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header.png') }}" alt="header"
+                    class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX">
+                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header1.png') }}" alt="header"
+                    class="theme-color-purple-img img-fluid w-100 h-100 animated-scaleX">
+                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header2.png') }}" alt="header"
+                    class="theme-color-blue-img img-fluid w-100 h-100 animated-scaleX">
+                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header3.png') }}" alt="header"
+                    class="theme-color-green-img img-fluid w-100 h-100 animated-scaleX">
+                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header4.png') }}" alt="header"
+                    class="theme-color-yellow-img img-fluid w-100 h-100 animated-scaleX">
+                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header5.png') }}" alt="header"
+                    class="theme-color-pink-img img-fluid w-100 h-100 animated-scaleX">
+            </div>
+        </div> <!-- Nav Header Component End -->
+        <!--Nav End-->
+        </div>
+        <div class="conatiner-fluid content-inner mt-n5 py-0">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Library Bundle Script -->
+    <script src="{{ url_for('static', filename='assets/js/core/libs.min.js') }}"></script>
+
+    <!-- External Library Bundle Script -->
+    <script src="{{ url_for('static', filename='assets/js/core/external.min.js') }}"></script>
+
+    <!-- Widgetchart Script -->
+    <script src="{{ url_for('static', filename='assets/js/charts/widgetcharts.js') }}"></script>
+
+    <!-- mapchart Script -->
+    <script src="{{ url_for('static', filename='assets/js/charts/vectore-chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/js/charts/dashboard.js') }}"></script>
+
+    <!-- Settings Script -->
+    <script src="{{ url_for('static', filename='assets/js/plugins/setting.js') }}"></script>
+
+    <!-- Slider-tab Script -->
+    <script src="{{ url_for('static', filename='assets/js/plugins/slider-tabs.js') }}"></script>
+
+    <!-- Form Wizard Script -->
+    <script src="{{ url_for('static', filename='assets/js/plugins/form-wizard.js') }}"></script>
+
+    <!-- AOS Animation Plugin-->
+    <script src="{{ url_for('static', filename='assets/vendor/aos/dist/aos.js') }}"></script>
+
+    <!-- App Script -->
+    <script src="{{ url_for('static', filename='assets/js/hope-ui.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

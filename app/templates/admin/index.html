@@ -1,0 +1,148 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Smart Parking | Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12 col-lg-12">
+    <div class="row row-cols-1">
+      <div class="overflow-hidden d-slider1 ">
+        <ul class="p-0 m-0 mb-2 swiper-wrapper list-inline">
+          <li class="swiper-slide card card-slide" data-aos="fade-up" data-aos-delay="700">
+            <div class="card-body">
+              <div class="progress-widget">
+                <div class="progress-detail">
+                  <p class="mb-2">Total Parking Location</p>
+                  <h4 class="counter">{{ total_locations }}</h4>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="swiper-slide card card-slide" data-aos="fade-up" data-aos-delay="800">
+            <div class="card-body">
+              <div class="progress-widget">
+                <div class="progress-detail">
+                  <p class="mb-2">Total Parking Slots</p>
+                  <h4 class="counter">{{ total_slots }}</h4>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="swiper-slide card card-slide" data-aos="fade-up" data-aos-delay="900">
+            <div class="card-body">
+              <div class="progress-widget">
+                <div class="progress-detail">
+                  <p class="mb-2">Occupied Slots</p>
+                  <h4 class="counter">{{ occupied_slots }}</h4>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="swiper-slide card card-slide" data-aos="fade-up" data-aos-delay="1000">
+            <div class="card-body">
+              <div class="progress-widget">
+                <div class="progress-detail">
+                  <p class="mb-2">Today's Revenue</p>
+                  <h4 class="counter">₹{{ "%.2f"|format(daily_revenue) }}</h4>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="swiper-slide card card-slide" data-aos="fade-up" data-aos-delay="1100">
+            <div class="card-body">
+              <div class="progress-widget">
+                <div class="progress-detail">
+                  <p class="mb-2">Monthly Revenue</p>
+                  <h4 class="counter">₹{{ "%.2f"|format(monthly_revenue) }}</h4>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="swiper-slide card card-slide" data-aos="fade-up" data-aos-delay="1200">
+            <div class="card-body">
+              <div class="progress-widget">
+                <div class="progress-detail">
+                  <p class="mb-2">Total Users</p>
+                  <h4 class="counter">{{ total_users }}</h4>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <div class="swiper-button swiper-button-next"></div>
+        <div class="swiper-button swiper-button-prev"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-12 col-lg-12">
+    <div class="overflow-hidden card" data-aos="fade-up" data-aos-delay="600">
+      <div class="flex-wrap card-header d-flex justify-content-between">
+        <div class="header-title">
+          <h4 class="mb-2 card-title">Recent Parking Activity</h4>
+          <p class="mb-0">
+            <svg class="me-2 text-primary icon-24" width="24" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+            </svg>
+            Last 24 hours
+          </p>
+        </div>
+      </div>
+      <div class="p-0 card-body">
+        <div class="mt-4 table-responsive">
+          <table id="basic-table" class="table mb-0 table-striped" role="grid">
+            <thead>
+              <tr>
+                <th>VEHICLE INFO</th>
+                <th>SPOT</th>
+                <th>DATE</th>
+                <th>ENTRY TIME</th>
+                <th>EXIT TIME</th>
+                <th>DURATION</th>
+                <th>PAYMENT</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for booking in recent_bookings %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div>
+                      <h6>{{ booking.vehicle_number }}</h6>
+                      <p class="mb-0">{{ booking.vehicle_type }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ booking.parking_slot.slot_number if booking.parking_slot else 'N/A' }}</td>
+                <td>{{ booking.created_at.strftime('%d-%m-%Y') }}</td>
+                <td>{{ booking.start_time.strftime('%H:%M %p') }}</td>
+                <td>{{ booking.end_time.strftime('%H:%M %p') }}</td>
+                <td>{{ booking.duration_hours }} hours</td>
+                <td>₹{{ "%.2f"|format(booking.total_price) }}</td>
+                <td>
+                  {% set current_time = now() %}
+                  {% set current_date = current_time.date() %}
+                  {% if booking.booking_status == 'completed' %}
+                  <span class="badge bg-success">Completed</span>
+                  {% elif booking.booking_status == 'cancelled' %}
+                  <span class="badge bg-danger">Cancelled</span>
+                  {% elif booking.booking_date < current_date or (booking.booking_date==current_date and
+                    booking.end_time < current_time.time()) %} <span class="badge bg-success">Completed</span>
+                    {% elif booking.booking_status == 'confirmed' %}
+                    <span class="badge bg-warning">Active</span>
+                    {% elif booking.booking_status == 'pending' %}
+                    <span class="badge bg-info">Pending</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ booking.booking_status }}</span>
+                    {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

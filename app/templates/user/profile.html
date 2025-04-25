@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Smart Parking System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">My Account</h4>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('auth.profile') }}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-user me-2"></i> Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Profile Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            <div class="avatar-container mb-3">
+                                {% if current_user.profile_image %}
+                                <img src="{{ current_user.profile_image }}" alt="Profile Image"
+                                    class="img-fluid rounded-circle"
+                                    style="width: 150px; height: 150px; object-fit: cover;">
+                                {% else %}
+                                <div class="avatar-placeholder bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white"
+                                    style="width: 150px; height: 150px; font-size: 3rem;">
+                                    {{ current_user.first_name[0] if current_user.first_name else
+                                    current_user.username[0] }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" id="changeAvatarBtn">
+                                <i class="fas fa-camera me-1"></i> Change Photo
+                            </button>
+                        </div>
+                        <div class="col-md-9">
+                            <h3>{{ current_user.get_full_name() }}</h3>
+                            <p class="text-muted">@{{ current_user.username }}</p>
+                            <div class="user-stats d-flex mb-3">
+                                <div class="me-4">
+                                    <i class="fas fa-calendar-check text-primary me-1"></i>
+                                    <span>Member since: {{ current_user.created_at.strftime('%b %d, %Y') }}</span>
+                                </div>
+                            </div>
+                            <p>
+                                <i class="fas fa-envelope text-primary me-1"></i> {{ current_user.email }}
+                            </p>
+                            <p>
+                                <i class="fas fa-phone text-primary me-1"></i>
+                                {{ current_user.phone_number if current_user.phone_number else 'Not provided' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mt-4">
+                        <h5><i class="fas fa-edit me-2"></i>Edit Profile</h5>
+                        <p class="text-muted small">Update your personal information and password</p>
+
+                        <form method="POST" action="{{ url_for('auth.update_profile') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name"
+                                        value="{{ current_user.first_name }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name"
+                                        value="{{ current_user.last_name }}" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone_number" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="phone_number" name="phone_number"
+                                    value="{{ current_user.phone_number }}" maxlength="10" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <h5><i class="fas fa-key me-2"></i>Change Password</h5>
+                        <p class="text-muted small">Ensure your account is using a secure password</p>
+
+                        <form method="POST" action="{{ url_for('auth.change_password') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirm_password"
+                                    name="confirm_password" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Change Password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

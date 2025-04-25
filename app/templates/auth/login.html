@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Smart Parking System{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Login</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="form-group mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control", placeholder="Enter your email", required=true) }}
+                            <div class="invalid-feedback" id="email-feedback">
+                                Please enter a valid email address.
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="text-danger">
+                                {% for error in form.email.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control", placeholder="Enter your password", required=true) }}
+                            <div class="invalid-feedback" id="password-feedback">
+                                Password is required.
+                            </div>
+                            {% if form.password.errors %}
+                            <div class="text-danger">
+                                {% for error in form.password.errors %}
+                                <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3 text-end">
+                            <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Forgot
+                                Password?</a>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <div>
+                        Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('loginForm');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+
+        // Validate email
+        email.addEventListener('input', function () {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value) {
+                email.classList.add('is-invalid');
+                document.getElementById('email-feedback').textContent = 'Email is required.';
+                return false;
+            } else if (!emailRegex.test(email.value)) {
+                email.classList.add('is-invalid');
+                document.getElementById('email-feedback').textContent = 'Please enter a valid email address.';
+                return false;
+            } else {
+                email.classList.remove('is-invalid');
+                email.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Validate password
+        password.addEventListener('input', function () {
+            if (!password.value) {
+                password.classList.add('is-invalid');
+                document.getElementById('password-feedback').textContent = 'Password is required.';
+                return false;
+            } else {
+                password.classList.remove('is-invalid');
+                password.classList.add('is-valid');
+                return true;
+            }
+        });
+
+        // Form submission validation
+        form.addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Check email
+            if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                email.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            // Check password
+            if (!password.value) {
+                password.classList.add('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

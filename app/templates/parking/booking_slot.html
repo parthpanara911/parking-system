@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Select Parking Slot - Smart Parking System{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .slot-selection-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .booking-summary {
+        background-color: #e9f7ef;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .location-details {
+        background-color: #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .location-image {
+        max-height: 200px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .vehicle-type-btn {
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .vehicle-type-btn i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .vehicle-type-btn.active {
+        background-color: #007bff;
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .slot-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .slot {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        border: 2px solid #dee2e6;
+        font-size: 0.9rem;
+    }
+
+    .slot:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .slot.available {
+        background-color: #e9f7ef;
+        border-color: #28a745;
+        color: #1e7e34;
+    }
+
+    .slot.selected {
+        background-color: #007bff;
+        border-color: #0056b3;
+        color: white;
+    }
+
+    .slot.unavailable {
+        background-color: #f8d7da;
+        border-color: #dc3545;
+        color: #721c24;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        margin-right: 8px;
+    }
+
+    .legend-available {
+        background-color: #e9f7ef;
+        border: 2px solid #28a745;
+    }
+
+    .legend-selected {
+        background-color: #007bff;
+        border: 2px solid #0056b3;
+    }
+
+    .legend-unavailable {
+        background-color: #f8d7da;
+        border: 2px solid #dc3545;
+    }
+
+    .slot-details {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background-color: #e9ecef;
+        display: none;
+    }
+
+    #noSlotsMessage {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #6c757d;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .slot-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .slot-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('parking.find_parking') }}">Find Parking</a></li>
+                    <li class="breadcrumb-item"><a
+                            href="{{ url_for('parking.booking_details', parking_id=location.id, booking_id=booking.id) }}">Booking
+                            Details</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Select Slot</li>
+                </ol>
+            </nav>
+
+            <h2 class="mb-4">
+                <i class="fas fa-parking me-2"></i> Select Parking Slot
+            </h2>
+
+            <div class="row">
+                <!-- Sidebar with booking details -->
+                <div class="col-md-4 mb-4">
+                    <div class="location-details">
+                        <img src="{{ location.image_url }}" class="location-image" alt="{{ location.name }}">
+                        <h4>{{ location.name }}</h4>
+                        <p><i class="fas fa-map-marker-alt me-2"></i>{{ location.address }}</p>
+                    </div>
+
+                    <div class="booking-summary">
+                        <h5><i class="fas fa-receipt me-2"></i>Booking Summary</h5>
+                        <div class="d-flex justify-content-between mt-3">
+                            <span>Date:</span>
+                            <span>{{ booking.booking_date.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Time:</span>
+                            <span>{{ booking.start_time.strftime('%H:%M') }} to {{ booking.end_time.strftime('%H:%M')
+                                }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Duration:</span>
+                            <span>{{ booking.duration_hours }} hours</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Vehicle:</span>
+                            <span>{{ booking.vehicle_number }}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Total Cost:</span>
+                            <span class="fw-bold">₹{{ booking.total_price }}</span>
+                        </div>
+                    </div>
+
+                    <div id="selectedSlotDetails" class="slot-details">
+                        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Selected Slot Details</h5>
+                        <div class="d-flex justify-content-between">
+                            <span>Slot Number:</span>
+                            <span id="slotNumber">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Vehicle Type:</span>
+                            <span id="slotVehicleType">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Hourly Rate:</span>
+                            <span id="slotRate">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main slot selection area -->
+                <div class="col-md-8">
+                    <div class="slot-selection-section">
+                        <h4 class="mb-3">Choose Vehicle Type</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button id="twoWheelerBtn" class="btn btn-outline-primary w-100 vehicle-type-btn"
+                                    data-vehicle-type="two-wheeler">
+                                    <i class="fas fa-motorcycle"></i>
+                                    Two Wheeler
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button id="fourWheelerBtn" class="btn btn-outline-primary w-100 vehicle-type-btn"
+                                    data-vehicle-type="four-wheeler">
+                                    <i class="fas fa-car"></i>
+                                    Four Wheeler
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="slotSelectionArea" style="display: none;">
+                            <hr>
+                            <h4 class="mb-3">Select a Parking Slot</h4>
+
+                            <div class="d-flex flex-wrap mb-3">
+                                <div class="legend-item">
+                                    <div class="legend-color legend-available"></div>
+                                    <span>Available</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color legend-selected"></div>
+                                    <span>Selected</span>
+                                </div>
+                            </div>
+
+                            <div id="slotsGrid" class="slot-grid">
+                                <!-- Will be filled by JavaScript -->
+                            </div>
+
+                            <div id="noSlotsMessage" style="display: none;">
+                                <p>No slots available for the selected vehicle type.</p>
+                            </div>
+
+                            <form id="slotForm" method="POST"
+                                action="{{ url_for('parking.booking_slot', booking_id=booking.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" id="slotId" name="slot_id">
+                                <input type="hidden" id="vehicleType" name="vehicle_type">
+
+                                <div class="mt-4 d-flex justify-content-between">
+                                    <a href="{{ url_for('parking.booking_details', parking_id=location.id, booking_id=booking.id) }}"
+                                        class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i> Back
+                                    </a>
+                                    <button type="submit" id="continueBtn" class="btn btn-primary" disabled>
+                                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    $(document).ready(function () {
+        let selectedSlotId = null;
+        let currentVehicleType = null;
+
+        // Handle vehicle type selection
+        $('.vehicle-type-btn').on('click', function () {
+            const vehicleType = $(this).data('vehicle-type');
+
+            // Reset selections
+            $('.vehicle-type-btn').removeClass('active');
+            $(this).addClass('active');
+            $('#slotsGrid').empty();
+            $('#selectedSlotDetails').hide();
+            selectedSlotId = null;
+            currentVehicleType = vehicleType;
+
+            // Show slot selection area
+            $('#slotSelectionArea').show();
+            $('#continueBtn').prop('disabled', true);
+
+            // Load slots for the selected vehicle type
+            loadSlots(parseInt('{{ location.id }}', 10), vehicleType);
+
+            // Update form field
+            $('#vehicleType').val(vehicleType);
+        });
+
+        // Function to load slots
+        function loadSlots(locationId, vehicleType) {
+            $.ajax({
+                url: `/parking/api/slots/${locationId}/${vehicleType}`,
+                method: 'GET',
+                success: function (slots) {
+                    if (slots.length > 0) {
+                        $('#noSlotsMessage').hide();
+                        $('#slotsGrid').empty();
+
+                        // Create slot elements - only show available slots
+                        slots.forEach(function (slot) {
+                            // Only create elements for available slots
+                            if (slot.is_available) {
+                                const slotElement = $(`
+                                    <div class="slot available" data-slot-id="${slot.id}" data-slot-number="${slot.slot_number}" data-hourly-rate="${slot.hourly_rate}" data-vehicle-type="${slot.vehicle_type}">
+                                        ${slot.slot_number}
+                                    </div>
+                                `);
+                                $('#slotsGrid').append(slotElement);
+                            }
+                        });
+
+                        // Add click handler to available slots
+                        $('.slot.available').on('click', function () {
+                            // Remove selection from all slots
+                            $('.slot').removeClass('selected');
+
+                            // Add selection to clicked slot
+                            $(this).addClass('selected');
+
+                            // Get slot details
+                            selectedSlotId = $(this).data('slot-id');
+                            const slotNumber = $(this).data('slot-number');
+                            const vehicleTypeName = $(this).data('vehicle-type') === 'two-wheeler' ? 'Two Wheeler' : 'Four Wheeler';
+                            const hourlyRate = $(this).data('hourly-rate');
+
+                            // Update slot details display
+                            $('#slotNumber').text(slotNumber);
+                            $('#slotVehicleType').text(vehicleTypeName);
+                            $('#slotRate').text(`₹${hourlyRate}/hour`);
+                            $('#selectedSlotDetails').show();
+
+                            // Update form field
+                            $('#slotId').val(selectedSlotId);
+
+                            // Enable continue button
+                            $('#continueBtn').prop('disabled', false);
+                        });
+                    } else {
+                        $('#slotsGrid').empty();
+                        $('#noSlotsMessage').show();
+                    }
+                },
+                error: function (error) {
+                    console.error('Error loading slots:', error);
+                    $('#slotsGrid').html('<div class="alert alert-danger">Error loading slots. Please try again.</div>');
+                }
+            });
+        }
+
+        // Form validation
+        $('#slotForm').on('submit', function (e) {
+            if (!selectedSlotId || !currentVehicleType) {
+                e.preventDefault();
+                alert('Please select a parking slot');
+                return false;
+            }
+
+            return true;
+        });
+    });
+</script>
+{% endblock %}

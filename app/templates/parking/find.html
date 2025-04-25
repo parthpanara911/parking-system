@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Find Parking - Smart Parking System{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<!-- Leaflet CSS for maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 450px;
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1;
+    }
+
+    .location-card {
+        margin-bottom: 15px;
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+
+    .location-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .availability-badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+    }
+
+    .high-availability {
+        background-color: #28a745;
+    }
+
+    .medium-availability {
+        background-color: #ffc107;
+    }
+
+    .low-availability {
+        background-color: #dc3545;
+    }
+
+    .parking-details {
+        font-size: 0.9rem;
+    }
+
+    .popup-content {
+        text-align: center;
+    }
+
+    .popup-content h5 {
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .popup-content p {
+        margin-bottom: 5px;
+    }
+
+    .popup-book-btn {
+        margin-top: 10px;
+    }
+
+    .parking-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-top-left-radius: calc(0.375rem - 1px);
+        border-top-right-radius: calc(0.375rem - 1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-3">
+                <i class="fas fa-car me-2"></i> Find Parking
+            </h2>
+            <p class="text-muted mb-4">Browse available parking locations in Ahmedabad and book your spot.</p>
+
+            <!-- Map Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Parking Map</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map"></div>
+                </div>
+            </div>
+
+            <!-- Locations List Section -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-list me-2"></i> Available Locations</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="locations-list">
+                        <!-- Will be populated by JavaScript -->
+                        <div class="col-12 text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading parking locations...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Parking Details Modal -->
+<div class="modal fade" id="parkingDetailsModal" tabindex="-1" aria-labelledby="parkingDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="parkingDetailsModalLabel">Parking Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="parkingModalContent">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="bookParkingBtn">Book Parking</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Leaflet JS for maps -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize the map centered on Ahmedabad
+    const map = L.map('map').setView([23.0225, 72.5714], 12);
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Store markers for later reference
+    const markers = {};
+    let currentLocationId = null;
+
+    // Function to determine availability status
+    function getAvailabilityStatus(available, total) {
+        const percentage = (available / total) * 100;
+        if (percentage > 50) return { class: 'high-availability', text: 'High Availability' };
+        else if (percentage > 20) return { class: 'medium-availability', text: 'Medium Availability' };
+        else return { class: 'low-availability', text: 'Low Availability' };
+    }
+
+    // Function to create popup content
+    function createPopupContent(location) {
+        return `
+            <div class="popup-content">
+                <h5>${location.name}</h5>
+                <p>${location.area}, ${location.city}</p>
+                <p><i class="far fa-clock me-2"></i>${location.opening_time} - ${location.closing_time}</p>
+                <p><i class="fas fa-car me-2"></i>${location.available_slots} / ${location.total_slots} spots</p>
+                <p><i class="fas fa-rupee-sign me-2"></i>${location.hourly_rate}/hour</p>
+                <button class="btn btn-primary btn-sm popup-book-btn" onclick="showParkingDetails(${location.id})">View Details</button>
+            </div>
+        `;
+    }
+
+    // Function to create location card
+    function createLocationCard(location) {
+        const availability = getAvailabilityStatus(location.available_slots, location.total_slots);
+
+        return `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card location-card h-100" data-id="${location.id}">
+                    <img src="${location.image_url}" class="parking-image" alt="${location.name}">
+                    <div class="card-body">
+                        <h5 class="card-title">${location.name}</h5>
+                        <p class="card-text text-muted">${location.area}, ${location.city}</p>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="parking-details"><i class="far fa-clock me-1"></i> ${location.opening_time} - ${location.closing_time}</span>
+                            <span class="parking-details"><i class="fas fa-rupee-sign me-1"></i> ${location.hourly_rate}/hour</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="parking-details"><i class="fas fa-car me-1"></i> ${location.available_slots} / ${location.total_slots} spots</span>
+                            <span class="badge availability-badge ${availability.class}">${availability.text}</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <button class="btn btn-primary btn-sm w-100" onclick="showParkingDetails(${location.id})">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to create modal content
+    function createModalContent(location) {
+        const availability = getAvailabilityStatus(location.available_slots, location.total_slots);
+
+        return `
+            <div class="text-center mb-3">
+                <img src="${location.image_url}" class="img-fluid rounded mb-3" style="max-height: 200px;" alt="${location.name}">
+                <h4>${location.name}</h4>
+                <span class="badge ${availability.class}">${availability.text}</span>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong></p>
+                </div>
+                <div class="col-6">
+                    <p>${location.address}</p>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <p><strong><i class="fas fa-car me-2"></i>Available Slots:</strong></p>
+                </div>
+                <div class="col-6">
+                    <p>${location.available_slots} / ${location.total_slots}</p>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <p><strong><i class="far fa-clock me-2"></i>Timing:</strong></p>
+                </div>
+                <div class="col-6">
+                    <p>${location.opening_time} - ${location.closing_time}</p>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <p><strong><i class="fas fa-rupee-sign me-2"></i>Hourly Rate:</strong></p>
+                </div>
+                <div class="col-6">
+                    <p>₹${location.hourly_rate}</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to show parking details in modal
+    function showParkingDetails(locationId) {
+        $.ajax({
+            url: `/parking/api/locations/${locationId}`,
+            method: 'GET',
+            success: function (location) {
+                $('#parkingModalContent').html(createModalContent(location));
+                $('#bookParkingBtn').data('location-id', location.id);
+                currentLocationId = location.id;
+                $('#parkingDetailsModal').modal('show');
+            },
+            error: function (error) {
+                console.error('Error fetching location details:', error);
+            }
+        });
+    }
+
+    // Handle the book button click
+    $(document).on('click', '#bookParkingBtn', function () {
+        if (currentLocationId) {
+            // Redirect to the booking details page
+            window.location.href = `/parking/booking_details/${currentLocationId}`;
+        }
+    });
+
+    // Handle location card clicks
+    $(document).on('click', '.location-card', function (e) {
+        if (!$(e.target).hasClass('btn')) {
+            const locationId = $(this).data('id');
+            showParkingDetails(locationId);
+        }
+    });
+
+    // Fetch parking locations
+    $(document).ready(function () {
+        $.ajax({
+            url: '/parking/api/locations',
+            method: 'GET',
+            success: function (locations) {
+                if (locations.length > 0) {
+                    // Clear loading indicator
+                    $('#locations-list').empty();
+
+                    // Add markers to map and create location cards
+                    locations.forEach(function (location) {
+                        // Create marker
+                        const marker = L.marker([location.latitude, location.longitude])
+                            .addTo(map)
+                            .bindPopup(createPopupContent(location));
+
+                        markers[location.id] = marker;
+
+                        // Create location card
+                        $('#locations-list').append(createLocationCard(location));
+                    });
+                } else {
+                    $('#locations-list').html('<div class="col-12 text-center py-4"><p>No parking locations found.</p></div>');
+                }
+            },
+            error: function (error) {
+                console.error('Error fetching parking locations:', error);
+                $('#locations-list').html('<div class="col-12 text-center py-4"><p class="text-danger">Error loading parking locations. Please try again later.</p></div>');
+            }
+        });
+    });
+
+    // Update the "Find Parking" link in the navbar
+    $(document).ready(function () {
+        $('a.nav-link:contains("Find Parking")').attr('href', "{{ url_for('parking.find_parking') }}");
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Parking Ticket</h4>
+                </div>
+                <div class="card-body">
+                    <div class="ticket-content">
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <h5>Booking Details</h5>
+                                <p><strong>Booking ID:</strong> {{ booking.id }}</p>
+                                <p><strong>Parking Location:</strong> {{ location.name }}</p>
+                                <p><strong>Address:</strong> {{ location.address }}</p>
+                                <p><strong>Vehicle Number:</strong> {{ booking.vehicle_number }}</p>
+                                <p><strong>Vehicle Type:</strong> {{ booking.vehicle_type }}</p>
+                                <p><strong>Date:</strong> {{ booking.booking_date.strftime('%Y-%m-%d') }}</p>
+                                <p><strong>Time:</strong> {{ booking.start_time.strftime('%H:%M') }} to {{
+                                    booking.end_time.strftime('%H:%M') }}</p>
+                                <p><strong>Slot Number:</strong> {{ parking_slot.slot_number }}</p>
+                                <p><strong>Duration:</strong> {{ "{:.1f}".format(duration_hours) }} hours</p>
+                                <p><strong>Total Price:</strong> ₹{{ "{:.2f}".format(total_price) }}</p>
+                                <p><strong>Payment Status:</strong> <span
+                                        class="badge {% if booking.payment_status == 'paid' %}bg-success{% else %}bg-warning{% endif %}">{{
+                                        booking.payment_status.title() }}</span></p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <img src="data:image/png;base64,{{ qr_code }}" class="img-fluid" alt="QR Code">
+                                <p class="mt-2 small text-muted">Show this QR code at entry</p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fa fa-info-circle"></i> Instructions</h6>
+                            <ol class="mb-0">
+                                <li>Show this ticket to the parking attendant.</li>
+                                <li>Please park your vehicle in the designated slot.</li>
+                                <li>Contact support at support@smartparking.com for assistance.</li>
+                            </ol>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            {% if booking.payment_status != 'paid' %}
+                            <a href="{{ url_for('payment.process_payment', booking_id=booking.id) }}"
+                                class="btn btn-success">
+                                <i class="fa fa-credit-card"></i> Pay Now
+                            </a>
+                            {% endif %}
+
+                            <a href="{{ url_for('parking.parking_ticket_pdf', booking_id=booking.id) }}"
+                                class="btn btn-primary">
+                                <i class="fa fa-download"></i> Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

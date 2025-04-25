@@ -1,0 +1,107 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Parking Slots Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Parking Slots Management</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">All Parking Slots</h6>
+            <div class="input-group" style="width: 300px;">
+                <input type="text" class="form-control" id="slotSearch" placeholder="Search slots...">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-search fa-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Location</th>
+                            <th>Slot Number</th>
+                            <th>Vehicle Type</th>
+                            <th>Hourly Rate</th>
+                            <th>Available</th>
+                            <th>Reserved</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in slots %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ slot.parking_location.name }}</td>
+                            <td>{{ slot.slot_number }}</td>
+                            <td>{{ slot.vehicle_type }}</td>
+                            <td>₹{{ slot.hourly_rate }}</td>
+                            <td>
+                                {% if slot.is_available %}
+                                <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                <span class="badge bg-danger">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if slot.is_reserved %}
+                                <span class="badge bg-warning">Yes</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm delete-btn" data-id="{{ slot.id }}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    $(document).ready(function () {
+        // Initialize the table with DataTables for pagination and searching
+        var table = $('#dataTable').DataTable();
+
+        // Table search functionality
+        $('#slotSearch').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+
+        // Delete button functionality
+        $('.delete-btn').on('click', function () {
+            const slotId = $(this).data('id');
+            if (confirm('Are you sure you want to delete this parking slot?')) {
+                $.ajax({
+                    url: '/admin/parking-slots/' + slotId,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (result) {
+                        // Reload the page to update the table
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error deleting parking slot: ' + (xhr.responseJSON?.message || error));
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
