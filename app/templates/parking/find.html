@@ -193,8 +193,8 @@
                         </div>
                         
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="parking-details"><i class="fas fa-car me-1"></i> ${location.available_slots} / ${location.total_slots} spots</span>
-                            <span class="badge availability-badge ${availability.class}">${availability.text}</span>
+                            <span class="parking-details" id="availability-${location.id}"><i class="fas fa-car me-1"></i> ${location.available_slots} / ${location.total_slots} spots</span>
+                            <span class="badge availability-badge ${availability.class}" id="badge-${location.id}">${availability.text}</span>
                         </div>
                     </div>
                     <div class="card-footer bg-white">
@@ -268,6 +268,39 @@
             }
         });
     }
+
+    function updateParkingAvailability() {
+        fetch('/parking/api/locations')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(location => {
+                    const counterElement = document.querySelector(`#availability-${location.id}`);
+                    if (counterElement) {
+                        counterElement.textContent = `${location.available_slots} / ${location.total_slots} spots`;
+
+                        // Optional: update badge color based on status
+                        const badge = document.querySelector(`#badge-${location.id}`);
+                        if (badge) {
+                            const ratio = location.available_slots / location.total_slots;
+                            badge.className = 'badge availability-badge ' + (
+                                ratio >= 0.5 ? 'bg-success' :
+                                    ratio >= 0.25 ? 'bg-warning' :
+                                        'bg-danger'
+                            );
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Error fetching parking data:', err);
+            });
+    }
+
+    // Refresh every 60 seconds
+    setInterval(updateParkingAvailability, 60000);
+
+    // Run immediately on page load too
+    updateParkingAvailability();
 
     // Handle the book button click
     $(document).on('click', '#bookParkingBtn', function () {

@@ -65,41 +65,48 @@ class Booking(db.Model):
     def release_expired_slots(cls):
         """Release slots for bookings that have ended"""
         now = datetime.now()
-        current_date = now.date()
-        current_time = now.time()
-
-        # Find confirmed bookings where end time has passed but slot is still reserved
-        expired_bookings = cls.query.filter(
-            cls.booking_date <= current_date,
-            cls.end_time <= current_time,
-            cls.booking_status == "confirmed",
-        ).all()
 
         from app.models.parking_slot import ParkingSlot
         from app.models.parking_location import ParkingLocation
 
-        # Release each slot
+        # Get all confirmed bookings with reserved slots
+        expired_bookings = cls.query.filter(
+            cls.booking_status == "confirmed",
+            cls.parking_slot_id.isnot(None)
+        ).all()
+
+        released_count = 0
+        updated_location_ids = set()
+
         for booking in expired_bookings:
-            if booking.parking_slot_id:
-                # Update booking status to completed
+            booking_end = datetime.combine(booking.booking_date, booking.end_time)
+
+            if booking_end <= now:
                 booking.booking_status = "completed"
 
-                # Release the slot
-                slot = ParkingSlot.get_by_id(booking.parking_slot_id)
+                # Free the parking slot
+                slot = ParkingSlot.query.get(booking.parking_slot_id)
                 if slot and not slot.is_available:
                     slot.is_available = True
                     slot.is_reserved = False
+                    db.session.add(slot)  
 
-                    # Update available slots count in the parking location
-                    location = ParkingLocation.get_by_id(booking.parking_location_id)
-                    if location:
-                        location.available_slots += 1
+                # Track affected locations to recalculate availability
+                updated_location_ids.add(booking.parking_location_id)
+                released_count += 1
 
-        # Commit changes if any bookings were updated
-        if expired_bookings:
+                db.session.add(booking)  
+
+        # Update availability count per location
+        for location_id in updated_location_ids:
+            location = ParkingLocation.query.get(location_id)
+            if location:
+                location.update_available_slots()
+
+        if released_count > 0:
             db.session.commit()
 
-        return len(expired_bookings)
+        return released_count
 
     def update_slot_details(self, slot_id, vehicle_type):
         """Update booking with slot details"""
@@ -117,7 +124,7 @@ class Booking(db.Model):
 
         location = ParkingLocation.query.get(self.parking_location_id)
         if location and location.available_slots > 0:
-            location.available_slots -= 1
+            location.update_available_slots()
 
         db.session.commit()
         return self

@@ -33,16 +33,45 @@ parking = Blueprint("parking", __name__, url_prefix="/parking")
 @login_required
 def find_parking():
     """Parking finder page that shows locations on map and in list view."""
+    Booking.release_expired_slots()
     return render_template("parking/find.html")
 
 
-@parking.route("/api/locations")
+@parking.route('/api/locations')
 @login_required
 def get_locations():
-    """API endpoint to get all parking locations as JSON."""
-    locations = ParkingLocation.get_all_locations()
-    return jsonify([location.to_dict() for location in locations])
+    from app.models.parking_slot import ParkingSlot  # Ensure imported
 
+    Booking.release_expired_slots()
+
+    locations = ParkingLocation.get_all_locations()
+    result = []
+
+    for location in locations:
+        available = ParkingSlot.query.filter_by(
+            parking_location_id=location.id,
+            is_available=True
+        ).count()
+
+        result.append({
+            "id": location.id,
+            "name": location.name,
+            "address": location.address,
+            "area": location.area,
+            "city": location.city,
+            "state": location.state,
+            "pincode": location.pincode,
+            "latitude": location.latitude,
+            "longitude": location.longitude,
+            "total_slots": location.total_slots,
+            "available_slots": available, 
+            "hourly_rate": location.hourly_rate,
+            "opening_time": str(location.opening_time),
+            "closing_time": str(location.closing_time),
+            "image_url": location.image_url
+        })
+
+    return jsonify(result)
 
 @parking.route("/api/locations/<int:location_id>")
 @login_required
@@ -236,7 +265,6 @@ def booking_slot():
 
     # Auto-release any expired slots before showing the slot selection page
     Booking.release_expired_slots()
-    # ParkingSlot.release_slot(slot_id)
 
     if request.method == "POST":
         # Get selected slot

@@ -1,6 +1,6 @@
 from datetime import datetime
 from app import db
-
+from app.models.parking_slot import ParkingSlot
 
 class ParkingLocation(db.Model):
     __tablename__ = "parking_locations"
@@ -47,6 +47,13 @@ class ParkingLocation(db.Model):
     def get_by_city(cls, city):
         """Get parking locations by city."""
         return cls.query.filter_by(city=city).all()
+    
+    def update_available_slots(self):
+        self.available_slots = ParkingSlot.query.filter_by(
+            parking_location_id=self.id,
+            is_available=True
+        ).count()
+        db.session.commit()
 
     def to_dict(self):
         """Convert the parking location to a dictionary."""
