@@ -4,7 +4,7 @@ A Flask-based smart parking management system with multiple features for users, 
 
 ## Features
 
-### Basic Features
+### Features
 - User Registration/Login
 - Admin Login
 - Parking Slot Booking
@@ -17,28 +17,6 @@ A Flask-based smart parking management system with multiple features for users, 
 - Admin Dashboard
 - User Dashboard
 
-### Advanced Features
-- RFID Tag Integration
-- License Plate Recognition
-- Real-Time Slot Availability with Sensors
-- Live CCTV Feed
-- Mobile App Integration
-- Payment Gateway Integration
-- Dynamic Pricing
-- User Reviews and Feedback
-- Loyalty Points
-
-### Innovative Features
-- Predictive Slot Availability (ML-based)
-- Carbon Footprint Estimation
-- Gamification for Eco-parking
-- Voice Command Booking
-- Integration with Maps
-- EV Charging Slot Monitoring
-- Nearby Services Suggestion
-
-## Workflow
-
 ### User/Driver Side
 - Open App or Web Interface
 - Register/Login
@@ -49,21 +27,18 @@ A Flask-based smart parking management system with multiple features for users, 
 - Confirm Booking (with Payment)
 - Receive Booking Confirmation
 - Navigate to Parking
-- Entry using QR Code/RFID/Plate Recognition
+- Entry 
 - Park Vehicle
-- On Exit: Scan QR or Automatic Detection
+- On Exit: Show Ticket n
 - Fee Calculation & Payment
 - Receipt Generation
 
 ### Admin Side
 - Admin Login
 - Dashboard View (Total Users, Slots, Revenue, Live Status)
-- Add/Edit/Delete Parking Slots
+- Delete Parking Slots
 - Monitor Slot Usage
 - View and Manage Users
-- Resolve User Complaints
-- View Reports and Statistics
-- Manage Payments & Refunds
 
 ## Project Structure
 ```
@@ -71,15 +46,9 @@ smart_parking_system/
 ├── app/
 │   ├── __init__.py
 │   ├── admin/
-│   ├── api/
 │   ├── auth/
 │   ├── models/
 │   ├── parking/
-│   ├── payment/
-│   ├── notification/
-│   ├── reports/
-│   ├── ml/
-│   ├── views/
 │   ├── static/
 │   ├── templates/
 │   └── utils/
