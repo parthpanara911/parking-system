@@ -1,6 +1,6 @@
-# Smart Parking System
+# Parking Management System
 
-A Flask-based smart parking management system with multiple features for users, administrators, and parking management.
+A Flask-based parking management system with multiple features for users, administrators, and parking management.
 
 ## Features
 
