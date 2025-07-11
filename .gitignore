@@ -1,0 +1,21 @@
+# Ignore Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore database and logs
+*.sqlite3
+*.db
+*.log
+
+# Ignore Flask instance and IDE configs
+instance/
+.vscode/
+.idea/

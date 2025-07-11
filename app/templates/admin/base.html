@@ -7,13 +7,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Smart Parking | Admin{% endblock %}</title>
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/images/favicon.ico') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/core/libs.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendor/aos/dist/aos.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/hope-ui.min1fc6.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/custom.min1fc6.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/customizer.min1fc6.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/rtl.min1fc6.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='admin/images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/core/libs.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/vendor/aos/dist/aos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/hope-ui.min1fc6.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/custom.min1fc6.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/customizer.min1fc6.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/rtl.min1fc6.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     {% block additional_css %}{% endblock %}
 </head>
@@ -29,17 +29,17 @@
             {% include 'admin/includes/navbar.html' %}
             <!-- Nav Header Component Start -->
             <div class="iq-header-img">
-                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header.png') }}" alt="header"
+                <img src="{{ url_for('static', filename='admin/images/dashboard/top-header.png') }}" alt="header"
                     class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX">
-                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header1.png') }}" alt="header"
+                <img src="{{ url_for('static', filename='admin/images/dashboard/top-header1.png') }}" alt="header"
                     class="theme-color-purple-img img-fluid w-100 h-100 animated-scaleX">
-                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header2.png') }}" alt="header"
+                <img src="{{ url_for('static', filename='admin/images/dashboard/top-header2.png') }}" alt="header"
                     class="theme-color-blue-img img-fluid w-100 h-100 animated-scaleX">
-                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header3.png') }}" alt="header"
+                <img src="{{ url_for('static', filename='admin/images/dashboard/top-header3.png') }}" alt="header"
                     class="theme-color-green-img img-fluid w-100 h-100 animated-scaleX">
-                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header4.png') }}" alt="header"
+                <img src="{{ url_for('static', filename='admin/images/dashboard/top-header4.png') }}" alt="header"
                     class="theme-color-yellow-img img-fluid w-100 h-100 animated-scaleX">
-                <img src="{{ url_for('static', filename='assets/images/dashboard/top-header5.png') }}" alt="header"
+                <img src="{{ url_for('static', filename='admin/images/dashboard/top-header5.png') }}" alt="header"
                     class="theme-color-pink-img img-fluid w-100 h-100 animated-scaleX">
             </div>
         </div> <!-- Nav Header Component End -->
@@ -51,32 +51,35 @@
     </main>
 
     <!-- Library Bundle Script -->
-    <script src="{{ url_for('static', filename='assets/js/core/libs.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/core/libs.min.js') }}"></script>
 
     <!-- External Library Bundle Script -->
-    <script src="{{ url_for('static', filename='assets/js/core/external.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/core/external.min.js') }}"></script>
 
     <!-- Widgetchart Script -->
-    <script src="{{ url_for('static', filename='assets/js/charts/widgetcharts.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/charts/widgetcharts.js') }}"></script>
 
     <!-- mapchart Script -->
-    <script src="{{ url_for('static', filename='assets/js/charts/vectore-chart.js') }}"></script>
-    <script src="{{ url_for('static', filename='assets/js/charts/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/charts/vectore-chart.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/charts/dashboard.js') }}"></script>
 
     <!-- Settings Script -->
-    <script src="{{ url_for('static', filename='assets/js/plugins/setting.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/plugins/setting.js') }}"></script>
 
     <!-- Slider-tab Script -->
-    <script src="{{ url_for('static', filename='assets/js/plugins/slider-tabs.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/plugins/slider-tabs.js') }}"></script>
 
     <!-- Form Wizard Script -->
-    <script src="{{ url_for('static', filename='assets/js/plugins/form-wizard.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/plugins/form-wizard.js') }}"></script>
 
     <!-- AOS Animation Plugin-->
-    <script src="{{ url_for('static', filename='assets/vendor/aos/dist/aos.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/vendor/aos/dist/aos.js') }}"></script>
 
     <!-- App Script -->
-    <script src="{{ url_for('static', filename='assets/js/hope-ui.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin/js/hope-ui.js') }}"></script>
+
+    <!-- Table handler Script -->
+    <script src="{{ url_for('static', filename='admin/js/admin-table-handler.js') }}"></script>
 
     {% block scripts %}{% endblock %}
 </body>

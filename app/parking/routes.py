@@ -37,10 +37,10 @@ def find_parking():
     return render_template("parking/find.html")
 
 
-@parking.route('/api/locations')
+@parking.route("/api/locations")
 @login_required
 def get_locations():
-    from app.models.parking_slot import ParkingSlot  # Ensure imported
+    from app.models.parking_slot import ParkingSlot  
 
     Booking.release_expired_slots()
 
@@ -49,29 +49,31 @@ def get_locations():
 
     for location in locations:
         available = ParkingSlot.query.filter_by(
-            parking_location_id=location.id,
-            is_available=True
+            parking_location_id=location.id, is_available=True
         ).count()
 
-        result.append({
-            "id": location.id,
-            "name": location.name,
-            "address": location.address,
-            "area": location.area,
-            "city": location.city,
-            "state": location.state,
-            "pincode": location.pincode,
-            "latitude": location.latitude,
-            "longitude": location.longitude,
-            "total_slots": location.total_slots,
-            "available_slots": available, 
-            "hourly_rate": location.hourly_rate,
-            "opening_time": str(location.opening_time),
-            "closing_time": str(location.closing_time),
-            "image_url": location.image_url
-        })
+        result.append(
+            {
+                "id": location.id,
+                "name": location.name,
+                "address": location.address,
+                "area": location.area,
+                "city": location.city,
+                "state": location.state,
+                "pincode": location.pincode,
+                "latitude": location.latitude,
+                "longitude": location.longitude,
+                "total_slots": location.total_slots,
+                "available_slots": available,
+                "hourly_rate": location.hourly_rate,
+                "opening_time": str(location.opening_time),
+                "closing_time": str(location.closing_time),
+                "image_url": location.image_url,
+            }
+        )
 
     return jsonify(result)
+
 
 @parking.route("/api/locations/<int:location_id>")
 @login_required
@@ -106,6 +108,14 @@ def booking_details(parking_id):
         if not booking or booking.user_id != current_user.id:
             flash("Invalid booking", "danger")
             return redirect(url_for("parking.find_parking"))
+        
+    # Block access if location is closed
+    if not location.is_open_now():
+        flash(
+            "Parking location is currently closed. Please try during open hours.",
+            "warning",
+        )
+        return redirect(url_for("parking.find_parking"))
 
     # For POST request, process the form
     if request.method == "POST":
@@ -175,7 +185,6 @@ def booking_details(parking_id):
                     "parking/booking_details.html", location=location, booking=booking
                 )
 
-            # Check if booking is within parking location hours
             # Convert opening and closing times to time objects
             opening_time = datetime.strptime(location.opening_time, "%H:%M").time()
             closing_time = datetime.strptime(location.closing_time, "%H:%M").time()
@@ -231,9 +240,18 @@ def booking_details(parking_id):
                 "parking/booking_details.html", location=location, booking=booking
             )
 
-    # For GET request, show the form
+    # For GET request, show the form with live available slots
+    from app.models.parking_slot import ParkingSlot
+
+    available_slots = ParkingSlot.query.filter_by(
+        parking_location_id=location.id, is_available=True
+    ).count()
+
     return render_template(
-        "parking/booking_details.html", location=location, booking=booking
+        "parking/booking_details.html",
+        location=location,
+        booking=booking,
+        available_slots=available_slots,
     )
 
 
@@ -263,6 +281,14 @@ def booking_slot():
         flash("Parking location not found", "danger")
         return redirect(url_for("parking.find_parking"))
 
+    # Block access if location is closed
+    if not location.is_open_now():
+        flash(
+            "Parking location is currently closed. Please try during open hours.",
+            "warning",
+        )
+        return redirect(url_for("parking.find_parking"))
+
     # Auto-release any expired slots before showing the slot selection page
     Booking.release_expired_slots()
 
@@ -285,16 +311,15 @@ def booking_slot():
                 "parking/booking_slot.html", location=location, booking=booking
             )
 
-        # Update booking with slot details
+        # Update booking with slot details (do NOT reserve the slot yet)
         booking.update_slot_details(slot_id, vehicle_type)
 
-        # Reserve the slot
-        ParkingSlot.reserve_slot(slot_id)
+        # Do NOT reserve the slot here!
+        # ParkingSlot.reserve_slot(slot_id)
 
-        # For now, redirect to a success page
-        # In a real application, you would proceed to a payment page
+        # Redirect to payment/confirmation page
         flash(
-            "Slot successfully reserved! Proceed to payment",
+            "Slot selected! Proceed to payment",
             "success",
         )
         return redirect(url_for("parking.booking_confirmation", booking_id=booking.id))
@@ -324,6 +349,14 @@ def booking_confirmation():
     if booking.parking_slot_id:
         slot = ParkingSlot.get_by_id(booking.parking_slot_id)
 
+    # Block access if location is closed
+    if not location.is_open_now():
+        flash(
+            "Parking location is currently closed. Please confirm booking during open hours.",
+            "warning",
+        )
+        return redirect(url_for("parking.find_parking"))
+
     # Handle POST request (payment processing)
     if request.method == "POST":
         payment_method = request.form.get("payment_method")
@@ -337,9 +370,23 @@ def booking_confirmation():
                 slot=slot,
             )
 
+        # Check slot availability before payment
+        if not slot or not slot.is_available:
+            flash(
+                "The selected slot is no longer available. Please choose another slot.",
+                "danger",
+            )
+            return redirect(url_for("parking.booking_slot", booking_id=booking.id))
+
+        # Reserve the slot only after successful payment
+        reserved = ParkingSlot.reserve_slot(slot.id)
+        if not reserved:
+            flash("Failed to reserve the slot. Please try again.", "danger")
+            return redirect(url_for("parking.booking_slot", booking_id=booking.id))
+
         # Handle different payment methods
         if payment_method == "cash":
-            booking.update_payment_details(payment_method, "pending")
+            booking.update_payment_details(payment_method, "paid")
             booking.booking_status = "confirmed"
             db.session.commit()
 
@@ -380,17 +427,6 @@ def get_slots(location_id, vehicle_type):
         return jsonify({"error": "Invalid vehicle type"}), 400
 
     slots = ParkingSlot.get_available_slots(location_id, vehicle_type)
-    return jsonify([slot.to_dict() for slot in slots])
-
-
-@parking.route("/api/all_slots/<int:location_id>/<vehicle_type>")
-@login_required
-def get_all_slots(location_id, vehicle_type):
-    """API endpoint to get all slots (available and unavailable) by location and vehicle type."""
-    if vehicle_type not in ["two-wheeler", "four-wheeler"]:
-        return jsonify({"error": "Invalid vehicle type"}), 400
-
-    slots = ParkingSlot.get_all_slots(location_id, vehicle_type)
     return jsonify([slot.to_dict() for slot in slots])
 
 
@@ -575,7 +611,7 @@ def seed_parking_locations():
                 "hourly_rate": 50.0,
                 "opening_time": "10:00",
                 "closing_time": "22:00",
-                "image_url": "/static/images/parking/alpha_one.jpg",
+                "image_url": "/static/user/images/parking/alpha_one.jpg",
             },
             {
                 "name": "Himalaya Mall Parking",
@@ -591,7 +627,7 @@ def seed_parking_locations():
                 "hourly_rate": 30.0,
                 "opening_time": "09:00",
                 "closing_time": "23:00",
-                "image_url": "/static/images/parking/himalaya_mall.jpg",
+                "image_url": "/static/user/images/parking/himalaya_mall.jpg",
             },
             {
                 "name": "Palladium Mall Parking",
@@ -607,7 +643,7 @@ def seed_parking_locations():
                 "hourly_rate": 50.0,
                 "opening_time": "10:00",
                 "closing_time": "22:00",
-                "image_url": "/static/images/parking/palladium_mall.jpg",
+                "image_url": "/static/user/images/parking/palladium_mall.jpg",
             },
             {
                 "name": "Central Mall Parking",
@@ -623,7 +659,7 @@ def seed_parking_locations():
                 "hourly_rate": 30.0,
                 "opening_time": "09:30",
                 "closing_time": "22:30",
-                "image_url": "/static/images/parking/central_mall.jpg",
+                "image_url": "/static/user/images/parking/central_mall.jpg",
             },
             {
                 "name": "Sabarmati Riverfront Parking",
@@ -639,7 +675,7 @@ def seed_parking_locations():
                 "hourly_rate": 30.0,
                 "opening_time": "06:00",
                 "closing_time": "23:00",
-                "image_url": "/static/images/parking/riverfront.jpg",
+                "image_url": "/static/user/images/parking/riverfront.jpg",
             },
             {
                 "name": "ISCON Mall Parking",
@@ -655,7 +691,7 @@ def seed_parking_locations():
                 "hourly_rate": 40.0,
                 "opening_time": "10:00",
                 "closing_time": "22:00",
-                "image_url": "/static/images/parking/iscon_mall.jpg",
+                "image_url": "/static/user/images/parking/iscon_mall.jpg",
             },
         ]
 

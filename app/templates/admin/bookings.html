@@ -3,6 +3,7 @@
 {% block title %}Bookings Management{% endblock %}
 
 {% block content %}
+<div id="alertArea"></div>
 <div class="container-fluid">
     <h1 class="h3 mb-4 text-gray-800">Bookings Management</h1>
 
@@ -20,7 +21,9 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" width="100%" cellspacing="0" id="dataTable" data-entity="bookings"
+                    data-url="/admin/bookings/" data-search="#bookingSearch"
+                    data-success-message="Booking deleted successfully.">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -86,6 +89,26 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-danger">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="confirmDeleteLabel">Confirm Deletion</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete this entry?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -94,36 +117,5 @@
 
 {% block scripts %}
 {{ super() }}
-<script>
-    $(document).ready(function () {
-        // Initialize the table with DataTables for pagination and searching
-        var table = $('#dataTable').DataTable();
-
-        // Table search functionality
-        $('#bookingSearch').on('keyup', function () {
-            table.search(this.value).draw();
-        });
-
-        // Delete button functionality
-        $('.delete-btn').on('click', function () {
-            const bookingId = $(this).data('id');
-            if (confirm('Are you sure you want to delete this booking?')) {
-                $.ajax({
-                    url: '/admin/bookings/' + bookingId,
-                    type: 'DELETE',
-                    headers: {
-                        'X-CSRFToken': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (result) {
-                        // Reload the page to update the table
-                        location.reload();
-                    },
-                    error: function (xhr, status, error) {
-                        alert('Error deleting booking: ' + (xhr.responseJSON?.message || error));
-                    }
-                });
-            }
-        });
-    });
-</script>
+<script src="{{ url_for('static', filename='admin/js/admin-table-handler.js') }}"></script>
 {% endblock %}

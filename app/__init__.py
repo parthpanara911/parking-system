@@ -3,10 +3,17 @@ from flask_login import login_required, current_user
 from config.settings import Config
 from app.extensions import db, migrate, login_manager, mail, csrf, cors
 from datetime import datetime
+import os
 
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+
+    app.config['ADMIN_PASSWORD'] = os.environ.get('ADMIN_PASSWORD')
+    app.config['ADMIN_EMAIL'] = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+
+    app.config['DEBUG'] = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config.from_object(config_class)
 
     # Initialize extensions with app
@@ -22,17 +29,14 @@ def create_app(config_class=Config):
     login_manager.login_message_category = "info"
     login_manager.login_message = "Please log in to access this page."
 
-    # Register auth blueprint
     from app.auth.routes import auth
 
     app.register_blueprint(auth)
 
-    # Register parking blueprint
     from app.parking.routes import parking, seed_parking_locations, seed_parking_slots
 
     app.register_blueprint(parking)
 
-    # Register admin blueprint
     from app.admin.routes import admin
 
     app.register_blueprint(admin)
@@ -49,56 +53,45 @@ def create_app(config_class=Config):
         else:
             return redirect(url_for("auth.login"))
 
-    @main.route("/profile")
-    @login_required
-    def profile():
-        """User profile page."""
-        return render_template("profile.html")
-
     app.register_blueprint(main)
 
-    # Register error handlers
     from app.utils.error_handlers import register_error_handlers
 
     register_error_handlers(app)
-
+        
     # Add template context processors
     @app.context_processor
     def utility_processor():
         return {"now": datetime.now}
 
-    # Import models to ensure they're registered with SQLAlchemy
     with app.app_context():
-        # Import models here to avoid circular imports
         from app.models.user import User
-        from app.models.parking_location import ParkingLocation
-        from app.models.parking_slot import ParkingSlot
 
         # Create database tables if they don't exist
         try:
             db.create_all()
 
-            # Create admin user if needed
-            if not User.query.filter_by(
-                email=app.config.get("ADMIN_EMAIL", "admin@example.com")
-            ).first():
-                try:
-                    admin = User(
-                        email=app.config.get("ADMIN_EMAIL", "admin@example.com"),
-                        username="admin",
-                        is_admin=True,
-                        first_name="Admin",
-                        last_name="User",
-                    )
-                    admin.set_password(
-                        "admin"
-                    )  # Default password, should be changed immediately
-                    db.session.add(admin)
-                    db.session.commit()
-                    app.logger.info("Created default admin user")
-                except Exception as e:
-                    db.session.rollback()
-                    app.logger.error(f"Error creating admin user: {str(e)}")
+            admin_email = app.config.get("ADMIN_EMAIL", "admin@example.com")
+            admin_password = app.config.get("ADMIN_PASSWORD", "default-fallback-password")
+
+            admin_user = User.query.filter_by(email=admin_email).first()
+
+            if not admin_user:
+                admin = User(
+                    email=admin_email,
+                    username="admin",
+                    is_admin=True,
+                    first_name="Admin",
+                    last_name="User",
+                )
+                admin.set_password(admin_password)
+                db.session.add(admin)
+                db.session.commit()
+                app.logger.info("Created default admin user")
+            else:
+                admin_user.set_password(admin_password)
+                db.session.commit()
+                app.logger.info("Updated admin password")
 
             # Seed parking locations if needed
             seed_parking_locations()
@@ -107,6 +100,7 @@ def create_app(config_class=Config):
             seed_parking_slots()
 
         except Exception as e:
+            db.session.rollback()
             app.logger.error(f"Error creating database tables: {str(e)}")
 
     # Shell context

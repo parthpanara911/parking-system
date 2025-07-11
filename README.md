@@ -10,7 +10,7 @@ A Flask-based smart parking management system with multiple features for users, 
 - Parking Slot Booking
 - Real-time Slot Availability
 - Parking Slot Allotment
-- Entry and Exit Time Logging
+- Entry/Exit Ticket Verification
 - Parking Fee Calculation
 - Bill Generation
 - Receipt Download (PDF)
@@ -29,14 +29,14 @@ A Flask-based smart parking management system with multiple features for users, 
 - Navigate to Parking
 - Entry 
 - Park Vehicle
-- On Exit: Show Ticket n
+- On Exit: Show Ticket 
 - Fee Calculation & Payment
 - Receipt Generation
 
 ### Admin Side
 - Admin Login
 - Dashboard View (Total Users, Slots, Revenue, Live Status)
-- Delete Parking Slots
+- Delete Parking Slots, Bookings
 - Monitor Slot Usage
 - View and Manage Users
 
@@ -54,6 +54,7 @@ smart_parking_system/
 │   └── utils/
 ├── config/
 ├── migrations/
+├── scripts/
 ├── tests/
 ├── .env
 ├── requirements.txt

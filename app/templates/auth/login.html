@@ -44,11 +44,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- <div class="mb-3 text-end">
-                            <a href="{{ url_for('auth.reset_password_request') }}" class="text-decoration-none">Forgot
-                                Password?</a>
-                        </div> -->
-
                         <div class="d-grid gap-2">
                             {{ form.submit(class="btn btn-primary") }}
                         </div>
@@ -63,66 +58,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('loginForm');
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-
-        // Validate email
-        email.addEventListener('input', function () {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email.value) {
-                email.classList.add('is-invalid');
-                document.getElementById('email-feedback').textContent = 'Email is required.';
-                return false;
-            } else if (!emailRegex.test(email.value)) {
-                email.classList.add('is-invalid');
-                document.getElementById('email-feedback').textContent = 'Please enter a valid email address.';
-                return false;
-            } else {
-                email.classList.remove('is-invalid');
-                email.classList.add('is-valid');
-                return true;
-            }
-        });
-
-        // Validate password
-        password.addEventListener('input', function () {
-            if (!password.value) {
-                password.classList.add('is-invalid');
-                document.getElementById('password-feedback').textContent = 'Password is required.';
-                return false;
-            } else {
-                password.classList.remove('is-invalid');
-                password.classList.add('is-valid');
-                return true;
-            }
-        });
-
-        // Form submission validation
-        form.addEventListener('submit', function (event) {
-            let isValid = true;
-
-            // Check email
-            if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-                email.classList.add('is-invalid');
-                isValid = false;
-            }
-
-            // Check password
-            if (!password.value) {
-                password.classList.add('is-invalid');
-                isValid = false;
-            }
-
-            if (!isValid) {
-                event.preventDefault();
-            }
-        });
-    });
-</script>
 {% endblock %}

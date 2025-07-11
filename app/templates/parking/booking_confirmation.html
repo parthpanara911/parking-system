@@ -4,111 +4,9 @@
 
 {% block styles %}
 {{ super() }}
-<style>
-    .confirmation-section {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .booking-success {
-        background-color: #e9f7ef;
-        border-left: 4px solid #28a745;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-
-    .location-details {
-        background-color: #e9ecef;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    .location-image {
-        max-height: 200px;
-        width: 100%;
-        object-fit: cover;
-        border-radius: 8px;
-        margin-bottom: 15px;
-    }
-
-    .payment-option {
-        border: 2px solid #dee2e6;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .payment-option:hover {
-        border-color: #007bff;
-        transform: translateY(-2px);
-    }
-
-    .payment-option.selected {
-        border-color: #28a745;
-        background-color: #e9f7ef;
-    }
-
-    .payment-option .icon {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
-
-    .qr-code {
-        max-width: 150px;
-        margin: 0 auto;
-    }
-
-    .ticket {
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-bottom: 20px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .ticket::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 10px;
-        right: 10px;
-        height: 10px;
-        background-color: #007bff;
-        border-radius: 0 0 50% 50%;
-    }
-
-    .ticket::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 10px;
-        right: 10px;
-        height: 10px;
-        background-color: #007bff;
-        border-radius: 50% 50% 0 0;
-    }
-
-    .ticket-header {
-        border-bottom: 2px dashed #dee2e6;
-        padding-bottom: 15px;
-        margin-bottom: 15px;
-    }
-
-    .ticket-qr {
-        padding: 15px;
-        border: 1px dashed #dee2e6;
-        border-radius: 5px;
-        text-align: center;
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='user/css/booking.css') }}">
+{% endblock %}
 {% endblock %}
 
 {% block content %}
@@ -230,7 +128,8 @@
                                 <hr>
                                 <div class="row">
                                     <div class="col-6 fw-bold">Total Amount:</div>
-                                    <div class="col-6 text-end fw-bold fs-5">₹{{ slot.hourly_rate * booking.duration_hours }}</div>
+                                    <div class="col-6 text-end fw-bold fs-5">₹{{ slot.hourly_rate *
+                                        booking.duration_hours }}</div>
                                 </div>
                             </div>
                         </div>
@@ -299,41 +198,7 @@
 
 {% block scripts %}
 {{ super() }}
-<script>
-    $(document).ready(function () {
-        // Handle payment method selection
-        $('.payment-option').on('click', function () {
-            const paymentMethod = $(this).data('payment-method');
-
-            // Unselect all payment options
-            $('.payment-option').removeClass('selected');
-            $('input[name="payment_method"]').prop('checked', false);
-
-            // Select clicked payment option
-            $(this).addClass('selected');
-            $(`#${paymentMethod}Option`).prop('checked', true);
-        });
-
-        // Form validation
-        $('#paymentForm').on('submit', function (e) {
-            const paymentMethod = $('input[name="payment_method"]:checked').val();
-
-            if (!paymentMethod) {
-                e.preventDefault();
-                alert('Please select a payment method');
-                return false;
-            }
-
-            // If RazorPay is selected, we would integrate their API here
-            if (paymentMethod === 'razorpay') {
-                // This is a placeholder for RazorPay integration
-                // In a real application, you would integrate with their JavaScript SDK
-                alert('RazorPay integration would be implemented here in a production environment.');
-                // Allow form submission for demonstration purposes
-            }
-
-            return true;
-        });
-    });
-</script>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='user/js/booking.js') }}"></script>
+{% endblock %}
 {% endblock %}

@@ -15,7 +15,6 @@ class ParkingLocation(db.Model):
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
     total_slots = db.Column(db.Integer, nullable=False)
-    available_slots = db.Column(db.Integer, nullable=False)
     hourly_rate = db.Column(db.Float, nullable=False)
     opening_time = db.Column(db.String(10), nullable=False)  
     closing_time = db.Column(db.String(10), nullable=False) 
@@ -47,16 +46,15 @@ class ParkingLocation(db.Model):
     def get_by_city(cls, city):
         """Get parking locations by city."""
         return cls.query.filter_by(city=city).all()
-    
-    def update_available_slots(self):
-        self.available_slots = ParkingSlot.query.filter_by(
+
+    def to_dict(self):
+        from app.models.parking_slot import ParkingSlot  
+
+        live_available_slots = ParkingSlot.query.filter_by(
             parking_location_id=self.id,
             is_available=True
         ).count()
-        db.session.commit()
 
-    def to_dict(self):
-        """Convert the parking location to a dictionary."""
         return {
             "id": self.id,
             "name": self.name,
@@ -68,9 +66,20 @@ class ParkingLocation(db.Model):
             "latitude": self.latitude,
             "longitude": self.longitude,
             "total_slots": self.total_slots,
-            "available_slots": self.available_slots,
+            "available_slots": live_available_slots, 
             "hourly_rate": self.hourly_rate,
             "opening_time": self.opening_time,
             "closing_time": self.closing_time,
             "image_url": self.image_url,
         }
+    
+    def is_open_now(self):
+        now = datetime.now().time()
+        opening = datetime.strptime(self.opening_time, "%H:%M").time()
+        closing = datetime.strptime(self.closing_time, "%H:%M").time()
+
+        if opening < closing:
+            return opening <= now <= closing
+        else:
+            return now >= opening or now <= closing
+    

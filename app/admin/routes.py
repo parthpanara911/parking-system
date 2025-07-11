@@ -179,8 +179,6 @@ def delete_booking(booking_id):
 
                 # Update available slots count in the parking location
                 location = ParkingLocation.query.get(booking.parking_location_id)
-                if location:
-                    location.available_slots += 1
 
         # Delete the booking
         db.session.delete(booking)

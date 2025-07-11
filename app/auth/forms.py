@@ -119,36 +119,3 @@ class RegistrationForm(FlaskForm):
             raise ValidationError(
                 "Email already registered. Please use a different email or log in."
             )
-
-
-class ResetPasswordRequestForm(FlaskForm):
-    """Form for requesting a password reset."""
-
-    email = EmailField(
-        "Email", validators=[DataRequired(), Email(message="Invalid email address")]
-    )
-    submit = SubmitField("Reset Password")
-
-
-class ResetPasswordForm(FlaskForm):
-    """Form for resetting a password."""
-
-    password = PasswordField(
-        "New Password",
-        validators=[
-            DataRequired(),
-            Length(min=8, message="Password must be at least 8 characters long"),
-            Regexp(
-                "^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$",
-                message="Password must contain at least one letter and one number",
-            ),
-        ],
-    )
-    confirm_password = PasswordField(
-        "Confirm New Password",
-        validators=[
-            DataRequired(),
-            EqualTo("password", message="Passwords must match"),
-        ],
-    )
-    submit = SubmitField("Reset Password")

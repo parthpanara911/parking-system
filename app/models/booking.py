@@ -71,8 +71,7 @@ class Booking(db.Model):
 
         # Get all confirmed bookings with reserved slots
         expired_bookings = cls.query.filter(
-            cls.booking_status == "confirmed",
-            cls.parking_slot_id.isnot(None)
+            cls.booking_status == "confirmed", cls.parking_slot_id.isnot(None)
         ).all()
 
         released_count = 0
@@ -89,19 +88,17 @@ class Booking(db.Model):
                 if slot and not slot.is_available:
                     slot.is_available = True
                     slot.is_reserved = False
-                    db.session.add(slot)  
+                    db.session.add(slot)
 
                 # Track affected locations to recalculate availability
                 updated_location_ids.add(booking.parking_location_id)
                 released_count += 1
 
-                db.session.add(booking)  
+                db.session.add(booking)
 
         # Update availability count per location
         for location_id in updated_location_ids:
             location = ParkingLocation.query.get(location_id)
-            if location:
-                location.update_available_slots()
 
         if released_count > 0:
             db.session.commit()
@@ -117,14 +114,11 @@ class Booking(db.Model):
         if vehicle_type == "two-wheeler":
             # Apply 50% discount for two-wheelers
             self.total_price = round(self.total_price * 0.5)
-        # No adjustment needed for four-wheelers as it's already at full price
 
         # Update the available slots count in the parking location
         from app.models.parking_location import ParkingLocation
 
         location = ParkingLocation.query.get(self.parking_location_id)
-        if location and location.available_slots > 0:
-            location.update_available_slots()
 
         db.session.commit()
         return self

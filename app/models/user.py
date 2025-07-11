@@ -29,10 +29,6 @@ class User(db.Model, UserMixin):
     locked_until = db.Column(db.DateTime)
     loyalty_points = db.Column(db.Integer, default=0)
     
-    # Relationships - comment out for now to avoid circular dependencies
-    # bookings = db.relationship('Booking', backref='user', lazy='dynamic', cascade='all, delete-orphan')
-    # vehicles = db.relationship('Vehicle', backref='owner', lazy='dynamic', cascade='all, delete-orphan')
-    # reviews = db.relationship('Review', backref='user', lazy='dynamic')
     
     def __repr__(self):
         return f'<User {self.username}>'
@@ -103,7 +99,6 @@ class User(db.Model, UserMixin):
             self.last_login = datetime.utcnow()
         else:
             self.login_attempts += 1
-            # Lock account after 5 failed attempts
             if self.login_attempts >= 5:
                 from datetime import timedelta
                 self.locked_until = datetime.utcnow() + timedelta(minutes=30)

@@ -28,6 +28,8 @@ def upgrade():
         batch_op.create_foreign_key(None, 'parking_locations', ['parking_location_id'], ['id'])
         batch_op.drop_column('location')
         batch_op.drop_column('coordinates')
+        op.drop_column('parking_locations', 'available_slots')
+
 
     # ### end Alembic commands ###
 
