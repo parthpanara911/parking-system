@@ -30,18 +30,18 @@ def admin_context():
     today = datetime.datetime.now().date()
     first_day_of_month = today.replace(day=1)
 
-    # Daily revenue - ensure it's never None
     daily_revenue_result = (
         db.session.query(db.func.sum(Booking.total_price))
         .filter(db.func.date(Booking.created_at) == today)
+        .filter(Booking.payment_status == "paid")
         .scalar()
     )
     daily_revenue = 0 if daily_revenue_result is None else daily_revenue_result
 
-    # Monthly revenue - ensure it's never None
     monthly_revenue_result = (
         db.session.query(db.func.sum(Booking.total_price))
         .filter(db.func.date(Booking.created_at) >= first_day_of_month)
+        .filter(Booking.payment_status == "paid")
         .scalar()
     )
     monthly_revenue = 0 if monthly_revenue_result is None else monthly_revenue_result
@@ -61,7 +61,7 @@ def dashboard():
     total_users = User.query.count()
 
     # Get recent parking activity (last 10 bookings)
-    recent_bookings = Booking.query.order_by(Booking.created_at.desc()).limit(10).all()
+    recent_bookings = Booking.query.order_by(Booking.created_at.desc()).filter(Booking.payment_status == "paid").limit(10).all()
 
     return render_template(
         "admin/index.html",
