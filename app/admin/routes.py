@@ -29,6 +29,7 @@ def admin_required(f):
 def admin_context():
     today = datetime.datetime.now().date()
     first_day_of_month = today.replace(day=1)
+    first_day_of_year = today.replace(day=1, month=1)
 
     daily_revenue_result = (
         db.session.query(db.func.sum(Booking.total_price))
@@ -45,8 +46,16 @@ def admin_context():
         .scalar()
     )
     monthly_revenue = 0 if monthly_revenue_result is None else monthly_revenue_result
+    
+    yearly_revenue_result = (
+        db.session.query(db.func.sum(Booking.total_price))
+        .filter(db.func.date(Booking.created_at) >= first_day_of_year)
+        .filter(Booking.payment_status == "paid")
+        .scalar()
+    )
+    yearly_revenue = 0 if yearly_revenue_result is None else yearly_revenue_result
 
-    return {"daily_revenue": daily_revenue, "monthly_revenue": monthly_revenue}
+    return {"daily_revenue": daily_revenue, "monthly_revenue": monthly_revenue, "yearly_revenue": yearly_revenue}
 
 
 @admin.route("/")

@@ -160,6 +160,12 @@ $(document).ready(function () {
             return false;
         }
 
+        // Vehicle number state code validation
+        if (!validateVehicleNumberJS()) {
+            e.preventDefault();
+            return false;
+        }
+
         return true;
     });
 
@@ -168,42 +174,65 @@ $(document).ready(function () {
 
     // Helper function for vehicle number formatting
     $('#vehicle_number').on('input', function () {
-        let value = $(this).val().toUpperCase();
-        // Remove any spaces or special characters
-        value = value.replace(/[^A-Z0-9]/g, '');
-        $(this).val(value);
-    });
-});
+        const vehicleInput = document.getElementById('vehicle_number');
+        const errorDiv = document.getElementById('vehicleError');
+        const value = vehicleInput.value.trim().toUpperCase();
+        const stateCode = value.substring(0, 2);
 
-// Validate vehicle number
-document.addEventListener('DOMContentLoaded', function () {
-    const vehicleInput = document.getElementById('vehicle_number');
-    const errorDiv = document.getElementById('vehicleError');
-
-    const validStates = ['MH', 'DL', 'GJ', 'KA', 'TN', 'RJ', 'UP', 'WB', 'HR', 'PB', 'CG', 'MP', 'BR', 'KL', 'AP', 'TS', 'UK', 'OD', 'AS', 'JK', 'AN', 'AR', 'CH', 'DD', 'DN', 'GA', 'HP', 'JH', 'LA', 'LD', 'ML', 'MN', 'MZ', 'NL', 'PY', 'SK', 'TR'];
-
-    vehicleInput.addEventListener('input', function () {
-        const value = vehicleInput.value.toUpperCase();
-        vehicleInput.value = value;
-        const regex = /^([A-Z]{2})(\d{1,2})([A-Z]{1,2})(\d{4})$/;
-        const match = value.match(regex);
-
-        let isValid = false;
-        if (match) {
-            const stateCode = match[1];
-            isValid = validStates.includes(stateCode);
-        }
-
-        if (!isValid) {
-            errorDiv.style.display = 'block';
+        if (value.length >= 2 && !validStateCodes.includes(stateCode)) {
+            if (errorDiv) {
+                errorDiv.textContent = "Vehicle number must start with a valid Indian state code, Please refer below Vehicle Number Format.";
+                errorDiv.style.display = 'block';
+            }
             vehicleInput.classList.add('is-invalid');
-        } else {
-            errorDiv.style.display = 'none';
+            vehicleInput.classList.remove('is-valid');
+        } else if (value.length >= 2 && validStateCodes.includes(stateCode)) {
+            if (errorDiv) {
+                errorDiv.textContent = "";
+                errorDiv.style.display = 'none';
+            }
             vehicleInput.classList.remove('is-invalid');
             vehicleInput.classList.add('is-valid');
+        } else if (value.length < 2) {
+            if (errorDiv) {
+                errorDiv.textContent = "";
+                errorDiv.style.display = 'none';
+            }
+            vehicleInput.classList.remove('is-invalid');
+            vehicleInput.classList.remove('is-valid');
         }
     });
 });
+
+const validStateCodes = [
+    "AP", "AR", "AS", "BR", "CG", "GA", "GJ", "HR", "HP", "JH", "KA", "KL", "MP", "MH", "ML", "MN", "MZ", "NL", "OD", "PB", "RJ",
+    "SK", "TN", "TS", "TR", "UP", "UK", "WB", "AN", "CH", "DD", "DN", "DL", "JK", "LA", "LD", "PY"
+];
+
+function validateVehicleNumberJS() {
+    const vehicleInput = document.getElementById('vehicle_number');
+    const errorDiv = document.getElementById('vehicleError');
+    if (!vehicleInput) return true;
+    const value = vehicleInput.value.trim().toUpperCase();
+    const stateCode = value.substring(0, 2);
+    if (!validStateCodes.includes(stateCode)) {
+        if (errorDiv) {
+            errorDiv.textContent = "Vehicle number must start with a valid Indian state code, Please refer Vehicle Number Format.";
+            errorDiv.style.display = 'block';
+        }
+        vehicleInput.classList.add('is-invalid');
+        vehicleInput.classList.remove('is-valid');
+        return false;
+    } else {
+        if (errorDiv) {
+            errorDiv.textContent = "";
+            errorDiv.style.display = 'none';
+        }
+        vehicleInput.classList.remove('is-invalid');
+        vehicleInput.classList.add('is-valid');
+    }
+    return true;
+}
 
 
 /* ========================
@@ -341,10 +370,8 @@ $(document).ready(function () {
 
         // If RazorPay is selected, we would integrate their API here
         if (paymentMethod === 'razorpay') {
-            // This is a placeholder for RazorPay integration
-            // In a real application, you would integrate with their JavaScript SDK
+            // In further process, integrate with their JavaScript SDK
             alert('Test Mode: Razorpay integration is active in test mode. No real payment will be processed.');
-            // Allow form submission for demonstration purposes
         }
 
         return true;
